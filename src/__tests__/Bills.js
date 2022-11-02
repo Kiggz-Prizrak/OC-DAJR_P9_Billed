@@ -2,8 +2,6 @@
  * @jest-environment jsdom
  */
 
-
-
 import _modal from "jquery-modal";
 
 import "@testing-library/jest-dom";
@@ -92,7 +90,7 @@ describe("Given I am connected as an employee", () => {
       document.body.innerHTML = BillsUI({ data: bills });
       const iconEyesList = screen.getAllByTestId("icon-eye");
 
-    //  console.log(iconEyesList);
+      //  console.log(iconEyesList);
 
       const handleClick = jest.fn(
         billsContainer.handleClickIconEye(iconEyesList[0])
@@ -130,6 +128,49 @@ describe("Given I am connected as an employee", () => {
       //userEvent simule une action
       userEvent.click(button);
       expect(handleNewBillClick).toHaveBeenCalled();
+    });
+  });
+
+  describe("When an error occurs on API", () => {
+    beforeEach(() => {
+      jest.spyOn(mockStore, "bills");
+      Object.defineProperty(window, "localStorage", {
+        value: localStorageMock,
+      });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "a@a",
+        })
+      );
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.appendChild(root);
+      router();
+    });
+
+    test("fetches bills from an API and fails with 404 message error", async () => {
+      // jest.spyOn(console, "error").mockImplementation(() => {});
+
+      Object.defineProperty(window, "location", {
+        value: { hash: ROUTES_PATH["Bill"] },
+      });
+
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          list: () => {
+            return Promise.reject(new Error("Erreur 404"));
+          },
+        };
+      });
+
+      window.onNavigate(ROUTES_PATH.Bills);
+      await new Promise(process.nextTick);
+      const message = await screen.getByText(/Erreur 404/);
+      expect(message).toBeTruthy();
+
+      // expect(console.error).toHaveBeenCalled();
     });
   });
 });

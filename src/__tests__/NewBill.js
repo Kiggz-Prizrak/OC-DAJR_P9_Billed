@@ -60,7 +60,7 @@ describe("Given I am connected as an employee", () => {
         };
 
         const file = new File(["hello"], "hello.png", { type: "image/png" });
-        const store = null;
+        const store = mockStore;
         const inputFile = screen.getByTestId("file");
 
         const newbill = new NewBill({
@@ -71,16 +71,11 @@ describe("Given I am connected as an employee", () => {
         });
 
         const handle = jest.fn((e) => newbill.handleChangeFile(e));
-        // inputFile.value = ".png";
-        console.log(inputFile.value);
 
         inputFile.addEventListener("change", handle);
 
         userEvent.upload(inputFile, file);
         expect(handle).toHaveBeenCalled();
-
-
-
       });
 
       test("then I provides aull fields and click on submit", () => {
@@ -102,7 +97,7 @@ describe("Given I am connected as an employee", () => {
         const store = null;
         const form = screen.getByTestId("form-new-bill");
 
-        const test = document.querySelector("#btn-send-bill");
+        const submitform = document.querySelector("#btn-send-bill");
 
         const newbill = new NewBill({
           document,
@@ -113,9 +108,9 @@ describe("Given I am connected as an employee", () => {
 
         const handle = jest.fn(() => newbill.handleAcceptSubmit);
 
-        test.addEventListener("click", handle);
+        submitform.addEventListener("click", handle);
 
-        userEvent.click(test);
+        userEvent.click(submitform);
         expect(handle).toHaveBeenCalled();
       });
     });
@@ -140,33 +135,61 @@ describe("Given I am connected as an employee", () => {
         document.body.appendChild(root);
         router();
       });
-      test.skip("fetches bills from an API and fails with 404 message error", async () => {
-        mockStore.bills.mockImplementationOnce(() => {
-          return {
-            list: () => {
-              return Promise.reject(new Error("Erreur 404"));
-            },
-          };
-        });
-        window.onNavigate(ROUTES_PATH.NewBill);
-        await new Promise(process.nextTick);
-        const message = await screen.getByText(/Erreur 404/);
-        expect(message).toBeTruthy();
-      });
+      
 
-      test.skip("fetches messages from an API and fails with 500 message error", async () => {
+      test("fetches messages from an API and fails with 500 message error", async () => {
+        
+        jest.spyOn(console, 'error').mockImplementation(() => {}) 
+
+
+        Object.defineProperty(window, "location", {
+          value: { hash: ROUTES_PATH['NewBill'] },
+        });
+
+        window.localStorage.setItem(
+          "user",
+          JSON.stringify({
+            type: "Employee",
+          })
+        );
+
+
+        document.body.innerHTML = `<div id='root'></div>`
+        router()
+
         mockStore.bills.mockImplementationOnce(() => {
           return {
-            list: () => {
+            update: () => {
               return Promise.reject(new Error("Erreur 500"));
             },
           };
         });
 
-        window.onNavigate(ROUTES_PATH.NewBill);
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname });
+        };
+
+        const store = null;
+
+        const newbill = new NewBill({
+          document,
+          onNavigate,
+          store,
+          localStorage: window.localStorage,
+        });
+
+        const form = screen.getByTestId("form-new-bill");
+        const submitform = document.querySelector("#btn-send-bill");
+
+        const handle = jest.fn(() => newbill.handleAcceptSubmit);
+
+        submitform.addEventListener("click", handle);
+
+        userEvent.click(submitform);
+
         await new Promise(process.nextTick);
-        const message = await screen.getByText(/Erreur 500/);
-        expect(message).toBeTruthy();
+
+        expect(console.error).toHaveBeenCalled()
       });
     });
   });

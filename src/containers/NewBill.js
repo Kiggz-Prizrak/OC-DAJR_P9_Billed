@@ -18,15 +18,15 @@ export default class NewBill {
   handleChangeFile = e => {
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-    const filePath = e.target.value.split(/\\/g)
-    const fileName = filePath[filePath.length-1]
-    const fileExtension = fileName.split(".").pop();
+   //  const filePath = e.target.value.split(/\\/g)
+    // const fileName = filePath[filePath.length-1]
+    const fileExtension = file.name.split(".").pop();
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
     formData.append('email', email)
 
-    // console.log(e.target.value)
+    
 
     if (fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png") {
       //console.log(fileExtension)
@@ -41,7 +41,7 @@ export default class NewBill {
         .then(({ fileUrl, key }) => {
           this.billId = key;
           this.fileUrl = fileUrl;
-          this.fileName = fileName;
+          this.fileName = file.name;
         })
         .catch((error) => console.error(error));
     }
