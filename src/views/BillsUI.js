@@ -9,9 +9,9 @@ const row = (bill) => {
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
-      <td>${bill.date}</td>
+      <td>${bill.dateFormated}</td>
       <td>${bill.amount} €</td>
-      <td>${bill.status}</td>
+      <td>${bill.statusFormated}</td>
       <td>
         ${Actions(bill.fileUrl)}
       </td>
@@ -19,9 +19,12 @@ const row = (bill) => {
     `)
   }
 
-  const sortBills = (data) => {
-    return (data && data.length) ? data.sort((a, b) => new Date(b.date) - new Date(a.date)) : []
-  };
+
+const sortBills = (data) => {
+  console.error(data);
+  return (data && data.length) ? data.sort((a, b) => new Date(b.date) - new Date(a.date)) : []
+};
+
 
 const rows = (data) => {
   return (data && data.length) ? data.map(bill => row(bill)).join("") : ""

@@ -49,8 +49,8 @@ export default class {
             try {
               return {
                 ...doc,
-                date: formatDate(doc.date),
-                status: formatStatus(doc.status),
+                dateFormated: formatDate(doc.date),
+                statusFormated: formatStatus(doc.status),
               };
             } catch (e) {
               // if for some reason, corrupted data was introduced, we manage here failing formatDate function
@@ -58,8 +58,8 @@ export default class {
               // console.log(e, "for", doc);
               return {
                 ...doc,
-                date: doc.date,
-                status: formatStatus(doc.status),
+                dateFormated: doc.date,
+                statusFormated: formatStatus(doc.status),
               };
             }
           });
